@@ -1,15 +1,25 @@
-from enum import auto
-import pika
+import pika, sys, os
 
-def on_message_received(channel, method, properties, body):
-    print(f'received message: {body}')
+def main():
+    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+    channel = connection.channel()
 
-connection_parameters = pika.ConnectionParameters(host='localhost')
-connection = pika.BlockingConnection(connection_parameters)
-channel = connection.channel()
-channel.queue_declare(queue='hello')
-channel.basic_publish(queue='hello', auto_ack = True, on_message_callback=on_message_received)
+    channel.queue_declare(queue='hello')
 
-print(' [*] Waiting for messages. To exit press CTRL+C')
+    def callback(ch, method, properties, body):
+        print(" [x] Received %r" % body)
 
-channel.start_consuming()
+    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+
+    print(' [*] Waiting for messages. To exit press CTRL+C')
+    channel.start_consuming()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        print('Interrupted')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
