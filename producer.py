@@ -1,18 +1,26 @@
-import pika, time
+import pika
+import time
+import random
 
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='localhost'))
+def on_message_received(ch, method, properties, body):
+    processing_time = random.randint(1, 6)
+    print(f'received: "{body}", will take {processing_time} to process')
+    time.sleep(processing_time)
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+    print(f'finished processing and acknowledged message')
+
+connection_parameters = pika.ConnectionParameters('localhost')
+
+connection = pika.BlockingConnection(connection_parameters)
+
 channel = connection.channel()
 
+channel.queue_declare(queue='letterbox')
 
+channel.basic_qos(prefetch_count=1)
 
+channel.basic_consume(queue='letterbox', on_message_callback=on_message_received)
 
-# Producer send message to queue every 3 seconds
-while True:
-    channel.queue_declare(queue='hello')
+print('Starting Consuming')
 
-    channel.basic_publish(exchange='', routing_key='hello', body='Hello World!')
-    print(" [x] Sent 'Hello World!'")
-    time.sleep(3)
-
-connection.close()
+channel.start_consuming()

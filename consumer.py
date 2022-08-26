@@ -1,25 +1,24 @@
-import pika, sys, os
+import pika
+import time
+import random
 
-def main():
-    connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
-    channel = connection.channel()
+connection_parameters = pika.ConnectionParameters('localhost')
 
-    channel.queue_declare(queue='hello')
+connection = pika.BlockingConnection(connection_parameters)
 
-    def callback(ch, method, properties, body):
-        print(" [x] Received %r" % body)
+channel = connection.channel()
 
-    channel.basic_consume(queue='hello', on_message_callback=callback, auto_ack=True)
+channel.queue_declare(queue='letterbox')
 
-    print(' [*] Waiting for messages. To exit press CTRL+C')
-    channel.start_consuming()
+messageId = 1
 
-if __name__ == '__main__':
-    try:
-        main()
-    except KeyboardInterrupt:
-        print('Interrupted')
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)
+while(True):
+    message = f"Sending Message Id: {messageId}"
+
+    channel.basic_publish(exchange='', routing_key='letterbox', body=message)
+
+    print(f"sent message: {message}")
+    
+    time.sleep(random.randint(1, 4))
+
+    messageId+=1
