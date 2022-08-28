@@ -12,7 +12,7 @@ connection_parameters = pika.ConnectionParameters(host='localhost')
 connection = pika.BlockingConnection(connection_parameters)
 channel = connection.channel()
 channel.queue_declare(queue='letterbox')
-channel.basic_qos(prefetch_count=1)
+#channel.basic_qos(prefetch_count=1) second consumer will not receive messages until first consumer has finished processing
 channel.basic_consume(queue='letterbox', on_message_callback=callback)
 print("waiting for messages")
 channel.start_consuming()
