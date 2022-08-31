@@ -4,7 +4,6 @@ from pika.exchange_type import ExchangeType
 def dlx_queue_callback(ch, method, properties, body):
     print(f"Received DLXqueue message: {body}")
 
-
 connection_parameters = pika.ConnectionParameters(host='localhost')
 connection = pika.BlockingConnection(connection_parameters)
 channel = connection.channel()
@@ -19,7 +18,6 @@ channel.queue_declare(queue='dlxequeue')
 channel.queue_bind('dlxequeue', 'dlx')
 
 channel.basic_consume(queue='dlxequeue', auto_ack=True, on_message_callback=dlx_queue_callback)
-
 
 print("waiting for messages")
 channel.start_consuming()
