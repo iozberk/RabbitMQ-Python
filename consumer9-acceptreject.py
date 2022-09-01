@@ -17,6 +17,6 @@ channel.queue_bind('letterbox', 'acceptrejectxchange','test')
 
 channel.basic_consume(queue='letterbox', on_message_callback=acceptreject_queue_callback)
 
-print("Waiting for messages")
+print("Waiting for message")
 channel.start_consuming()
 connection.close()
